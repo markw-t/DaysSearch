@@ -2,47 +2,31 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static DaysSearch.WeekDaysEnum;
+using static System.DayOfWeek;
 
 namespace DaysSearch
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
-            var inputs = new List<SearchInput>();
-
-            inputs.AddRange(new[]
+            var inputs = new[]
             {
-                new SearchInput
-                {
-                    WeekDay = Monday,
-                    Value = "Sunny"
-                },
-                new SearchInput
-                {
-                    WeekDay = Tuesday,
-                    Value = "Rainy"
-                }
-            });
+                new SearchInput { WeekDay = Monday, Value = "Sunny" },
+                new SearchInput { WeekDay = Tuesday, Value = "cloudless" }
+            };
 
-            var weeks = GetWeeks(inputs);
+            var weeks = GetSunnyWeeks(inputs);
 
-            Console.WriteLine($"Total weeks found: {weeks.Count()}");
+            Console.WriteLine($"Total of sunny weeks found: {weeks.Count()}");
+            Console.ReadKey(true);
         }
 
-        static IEnumerable<WeekDays> GetWeeks(IEnumerable<SearchInput> inputs)
+        static IEnumerable<WeekDays> GetSunnyWeeks(IEnumerable<SearchInput> inputs)
         {
             using var db = new DaysSearchContext();
 
-            db.Database.EnsureDeleted();
             db.Database.EnsureCreated();
-
-            db.WeekDays.Add(new WeekDays { Id = Guid.NewGuid(), Monday = "Sunny", Tuesday = "Rainy" });
-            db.WeekDays.Add(new WeekDays { Id = Guid.NewGuid(), Wednesday = "Cloudless" });
-            db.WeekDays.Add(new WeekDays { Id = Guid.NewGuid(), Friday = "Rainy" });
-
-            db.SaveChanges();
 
             var query = db.WeekDays.AsNoTracking();
 
@@ -51,10 +35,10 @@ namespace DaysSearch
                 switch (input.WeekDay)
                 {
                     case Monday:
-                        query = query.Where(x => x.Monday.ToLower() == input.Value.ToLower());
+                        query = query.Where(x => EF.Functions.Like(x.Monday, $"%{input.Value}%"));
                         break;
                     case Tuesday:
-                        query = query.Where(x => x.Tuesday.ToLower() == input.Value.ToLower());
+                        query = query.Where(x => EF.Functions.Like(x.Tuesday, $"%{input.Value}%"));
                         break;
                     case Wednesday:
                         break;
@@ -67,17 +51,11 @@ namespace DaysSearch
                     case Sunday:
                         break;
                     default:
-                        break;
+                        throw new NotImplementedException();
                 }
             }
 
             return query.ToList();
         }
-    }
-
-    class SearchInput
-    {
-        public WeekDaysEnum WeekDay { get; set; }
-        public string Value { get; set; }
     }
 }
