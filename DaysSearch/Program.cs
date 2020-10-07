@@ -50,14 +50,11 @@ namespace DaysSearch
             {
                 switch (input.WeekDay)
                 {
-                    //TODO: add queries for each case 
-                    // query = query.Where(x => x.Monday.ToLower() == input.Value.ToLower());
-
                     case Monday:
-                       
+                        query = query.Where(x => x.Monday.ToLower() == input.Value.ToLower());
                         break;
                     case Tuesday:
-                        
+                        query = query.Where(x => x.Tuesday.ToLower() == input.Value.ToLower());
                         break;
                     case Wednesday:
                         break;
