@@ -57,7 +57,6 @@ namespace DaysSearch
                        
                         break;
                     case Tuesday:
-                        
                         break;
                     case Wednesday:
                         break;
